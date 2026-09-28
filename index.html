@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毅见倾新 · The Beginning of Us | 毅华新生迎新会</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    
+    <!-- Tone.js for Web Audio synthesis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+SC:wght@400;600;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dragon: {
+                            bg: '#080608',
+                            dark: '#0f0a0e',
+                            card: '#160f16',
+                            cardBorder: '#2d182b',
+                            red: '#dc2626',
+                            redGlow: '#991b1b',
+                            gold: '#f59e0b',
+                            goldLight: '#fef08a',
+                            accent: '#d97706'
+                        }
+                    },
+                    fontFamily: {
+                        cinzel: ['"Cinzel"', 'serif'],
+                        outfit: ['"Outfit"', 'sans-serif'],
+                        serif: ['"Noto Serif SC"', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --cursor-x: -100px;
+            --cursor-y: -100px;
+        }
+
+        body {
+            background-color: #080608;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080608;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #991b1b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+
+        /* Waverun-style Spotlight Glow Card Effect */
+        .spotlight-card {
+            position: relative;
+            background: rgba(22, 15, 22, 0.7);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            backdrop-filter: blur(12px);
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+        
+        .spotlight-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: radial-gradient(
+                600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+                rgba(245, 158, 11, 0.4),
+                rgba(220, 38, 38, 0.2),
+                transparent 70%
+            );
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .spotlight-card:hover::before {
+            opacity: 1;
+        }
+
+        .spotlight-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(
+                400px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+                rgba(220, 38, 38, 0.12),
+                transparent 80%
+            );
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .spotlight-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Typography glow effects */
+        .text-glow-gold {
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.5), 0 0 40px rgba(245, 158, 11, 0.2);
+        }
+        .text-glow-red {
+            text-shadow: 0 0 20px rgba(220, 38, 38, 0.6), 0 0 40px rgba(220, 38, 38, 0.3);
+        }
+
+        /* Floating particles canvas */
+        #ember-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Custom Inertia Cursor Dot & Ring */
+        .cursor-dot {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background-color: #f59e0b;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px #f59e0b, 0 0 20px #dc2626;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        .cursor-aura {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
+        }
+
+        /* Glassmorphism Navigation */
+        .glass-nav {
+            background: rgba(8, 6, 8, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+        }
+    </style>
+</head>
+<body class="font-serif antialiased selection:bg-dragon-red selection:text-white">
+
+    <!-- Dragon Ember Particles Canvas -->
+    <canvas id="ember-canvas"></canvas>
+
+    <!-- Custom Trailing Cursor -->
+    <div id="cursor-dot" class="cursor-dot hidden md:block"></div>
+    <div id="cursor-aura" class="cursor-aura hidden md:block"></div>
+
+    <!-- Header / Navigation -->
+    <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#hero" class="flex items-center space-x-3 group">
+                <div class="w-10 h-10 rounded-full border border-dragon-gold/40 bg-dragon-dark flex items-center justify-center text-dragon-gold group-hover:border-dragon-gold group-hover:scale-105 transition-all">
+                    <i data-lucide="flame" class="w-5 h-5 text-dragon-red group-hover:text-dragon-gold transition-colors"></i>
+                </div>
+                <div>
+                    <span class="font-cinzel font-bold text-lg text-white group-hover:text-dragon-gold transition-colors block leading-none">THE BEGINNING OF US</span>
+                    <span class="text-xs text-dragon-gold/70 tracking-widest font-serif block mt-1">毅见倾新 · 迎新会</span>
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden md:flex items-center space-x-8 font-outfit text-sm tracking-wider">
+                <a href="#about" class="text-gray-300 hover:text-dragon-gold transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-dragon-gold hover:after:w-full after:transition-all">活动简介 ABOUT</a>
+                <a href="#timeline" class="text-gray-300 hover:text-dragon-gold transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-dragon-gold hover:after:w-full after:transition-all">流程 TIMELINE</a>
+                <a href="#poster" class="text-gray-300 hover:text-dragon-gold transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-dragon-gold hover:after:w-full after:transition-all">海报 POSTER</a>
+                <a href="#contact" class="text-gray-300 hover:text-dragon-gold transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-dragon-gold hover:after:w-full after:transition-all">联系 CONTACT</a>
+            </nav>
+
+            <!-- Actions (Sound Toggle & RSVP Button) -->
+            <div class="flex items-center space-x-4">
+                <!-- Audio Soundscape Toggle -->
+                <button id="sound-toggle" class="p-2.5 rounded-full border border-dragon-gold/30 bg-dragon-card text-gray-400 hover:text-dragon-gold hover:border-dragon-gold transition-all" title="切换背景音效 / Ambient Synth">
+                    <i data-lucide="volume-x" id="sound-icon" class="w-5 h-5"></i>
+                </button>
+
+                <!-- RSVP CTA Button -->
+                <button onclick="openRSVPModal()" class="relative inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold tracking-wider font-outfit text-black bg-gradient-to-r from-dragon-gold via-dragon-goldLight to-dragon-accent rounded-full overflow-hidden group shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] transition-all transform hover:-translate-y-0.5">
+                    <span class="relative z-10 flex items-center space-x-2">
+                        <span>立即报名 RSVP</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-300 hover:text-white">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden bg-dragon-dark/95 border-b border-dragon-gold/20 px-4 pt-2 pb-6 space-y-3 font-outfit text-center">
+            <a href="#about" class="block py-2 text-gray-300 hover:text-dragon-gold" onclick="toggleMobileMenu()">活动简介 ABOUT</a>
+            <a href="#timeline" class="block py-2 text-gray-300 hover:text-dragon-gold" onclick="toggleMobileMenu()">流程 TIMELINE</a>
+            <a href="#poster" class="block py-2 text-gray-300 hover:text-dragon-gold" onclick="toggleMobileMenu()">海报 POSTER</a>
+            <a href="#contact" class="block py-2 text-gray-300 hover:text-dragon-gold" onclick="toggleMobileMenu()">联系 CONTACT</a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden z-10">
+        <!-- Ambient Background Glow Spheres -->
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-dragon-red/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-dragon-gold/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            
+            <!-- Category Tag Badge -->
+            <div class="hero-anim inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-dragon-gold/40 bg-dragon-card/80 backdrop-blur-md mb-8 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+                <span class="w-2 h-2 rounded-full bg-dragon-red animate-pulse"></span>
+                <span class="text-xs font-outfit tracking-widest text-dragon-gold uppercase font-semibold">2026/2027 毅华新生迎新会</span>
+            </div>
+
+            <!-- Main Title Group -->
+            <h1 class="hero-anim text-5xl sm:text-7xl lg:text-9xl font-black font-serif tracking-tight text-white mb-4">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-white via-dragon-goldLight to-dragon-gold text-glow-gold">毅见倾新</span>
+            </h1>
+            
+            <p class="hero-anim font-cinzel text-2xl sm:text-4xl text-dragon-gold font-bold tracking-widest mb-6 text-glow-gold">
+                THE BEGINNING OF US
+            </p>
+
+            <!-- Slogan Box -->
+            <div class="hero-anim max-w-2xl mx-auto py-4 border-y border-dragon-red/40 my-8 bg-gradient-to-r from-transparent via-dragon-red/10 to-transparent">
+                <p class="font-cinzel text-lg sm:text-xl text-gray-300 tracking-wider italic mb-1">
+                    "Arrive as Strangers. Rise as One."
+                </p>
+                <p class="font-serif text-xl sm:text-2xl text-dragon-gold font-semibold">
+                    陌路而来，同心而聚。
+                </p>
+            </div>
+
+            <!-- Live Countdown Timer -->
+            <div class="hero-anim my-10">
+                <p class="text-xs font-outfit uppercase tracking-widest text-gray-400 mb-4">距离活动开启 COUNTDOWN TO EVENT</p>
+                <div class="flex justify-center items-center space-x-3 sm:space-x-6" id="countdown-timer">
+                    <div class="spotlight-card px-4 py-3 sm:px-6 sm:py-4 rounded-xl text-center min-w-[70px] sm:min-w-[90px]">
+                        <span id="cd-days" class="font-outfit font-bold text-2xl sm:text-4xl text-dragon-gold block">00</span>
+                        <span class="text-[10px] sm:text-xs text-gray-400 tracking-wider">DAYS</span>
+                    </div>
+                    <span class="text-dragon-gold font-bold text-xl">:</span>
+                    <div class="spotlight-card px-4 py-3 sm:px-6 sm:py-4 rounded-xl text-center min-w-[70px] sm:min-w-[90px]">
+                        <span id="cd-hours" class="font-outfit font-bold text-2xl sm:text-4xl text-dragon-gold block">00</span>
+                        <span class="text-[10px] sm:text-xs text-gray-400 tracking-wider">HOURS</span>
+                    </div>
+                    <span class="text-dragon-gold font-bold text-xl">:</span>
+                    <div class="spotlight-card px-4 py-3 sm:px-6 sm:py-4 rounded-xl text-center min-w-[70px] sm:min-w-[90px]">
+                        <span id="cd-mins" class="font-outfit font-bold text-2xl sm:text-4xl text-dragon-gold block">00</span>
+                        <span class="text-[10px] sm:text-xs text-gray-400 tracking-wider">MINS</span>
+                    </div>
+                    <span class="text-dragon-gold font-bold text-xl">:</span>
+                    <div class="spotlight-card px-4 py-3 sm:px-6 sm:py-4 rounded-xl text-center min-w-[70px] sm:min-w-[90px]">
+                        <span id="cd-secs" class="font-outfit font-bold text-2xl sm:text-4xl text-dragon-red block">00</span>
+                        <span class="text-[10px] sm:text-xs text-gray-400 tracking-wider">SECS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Details Cards Row -->
+            <div class="hero-anim grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto my-12 text-left">
+                <div class="spotlight-card p-5 rounded-2xl border border-dragon-gold/20 flex items-center space-x-4">
+                    <div class="p-3 rounded-xl bg-dragon-red/20 text-dragon-gold">
+                        <i data-lucide="calendar" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-400 font-outfit uppercase">日期 DATE</div>
+                        <div class="text-lg font-bold text-white">01 / 10 / 2026</div>
+                        <div class="text-xs text-dragon-gold">星期四 (Thursday)</div>
+                    </div>
+                </div>
+
+                <div class="spotlight-card p-5 rounded-2xl border border-dragon-gold/20 flex items-center space-x-4">
+                    <div class="p-3 rounded-xl bg-dragon-red/20 text-dragon-gold">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-400 font-outfit uppercase">时间 TIME</div>
+                        <div class="text-lg font-bold text-white">7:30 PM - 9:30 PM</div>
+                        <div class="text-xs text-gray-400">请提前10分钟报到</div>
+                    </div>
+                </div>
+
+                <div class="spotlight-card p-5 rounded-2xl border border-dragon-gold/20 flex items-center space-x-4">
+                    <div class="p-3 rounded-xl bg-dragon-red/20 text-dragon-gold">
+                        <i data-lucide="map-pin" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-400 font-outfit uppercase">地点 VENUE</div>
+                        <div class="text-lg font-bold text-white">Grand Hall KPZ</div>
+                        <div class="text-xs text-dragon-gold">Kolej Pendeta Za'ba</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="hero-anim flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button onclick="openRSVPModal()" class="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-dragon-gold to-dragon-accent text-black font-outfit font-bold tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.4)] hover:shadow-[0_0_35px_rgba(245,158,11,0.7)] transition-all transform hover:-translate-y-1">
+                    预约 30 席位限定名额
+                </button>
+                <a href="#timeline" class="w-full sm:w-auto px-8 py-4 rounded-full border border-dragon-gold/40 text-gray-200 hover:text-white hover:border-dragon-gold font-outfit font-medium tracking-wider backdrop-blur-md transition-all">
+                    探索流程安排
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CONCEPT & ABOUT SECTION -->
+    <section id="about" class="py-24 relative z-10 border-t border-dragon-red/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-outfit uppercase tracking-widest text-dragon-gold mb-3">CONCEPT & DESIGN PHILOSOPHY</h2>
+                <p class="text-3xl sm:text-5xl font-bold font-serif text-white">龙吟新篇 · 相聚成双</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Card 1 -->
+                <div class="spotlight-card p-8 rounded-3xl border border-dragon-gold/20 flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-dragon-red/20 border border-dragon-red/40 flex items-center justify-center text-dragon-gold mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="users" class="w-6 h-6 text-dragon-gold"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold font-serif text-white mb-4">相遇，成为「我们」</h3>
+                        <p class="text-gray-400 leading-relaxed text-sm">
+                            寓意来自不同地方的新生，打破陌生的隔阂。因为相遇而汇聚成一个充满凝聚力的团队，共同拉开大学生活璀璨新篇章的序幕。
+                        </p>
+                    </div>
+                    <div class="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-xs text-dragon-gold font-outfit">
+                        <span>ARRIVE AS STRANGERS</span>
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="spotlight-card p-8 rounded-3xl border border-dragon-gold/20 flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-dragon-gold/20 border border-dragon-gold/40 flex items-center justify-center text-dragon-gold mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="palette" class="w-6 h-6 text-dragon-gold"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold font-serif text-white mb-4">Modern Dragon 风格</h3>
+                        <p class="text-gray-400 leading-relaxed text-sm">
+                            融合东方龙元素的雄浑气魄与现代暗黑科技奢华感。以黑（深邃神秘）、红（激情炽热）、金（高贵辉煌）三色交织，彰显新生蓬勃张力。
+                        </p>
+                    </div>
+                    <div class="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-xs text-dragon-gold font-outfit">
+                        <span>BLACK x RED x GOLD</span>
+                        <i data-lucide="crown" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="spotlight-card p-8 rounded-3xl border border-dragon-gold/20 flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-dragon-red/20 border border-dragon-red/40 flex items-center justify-center text-dragon-gold mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="shield-check" class="w-6 h-6 text-dragon-gold"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold font-serif text-white mb-4">预计 30 精英席位</h3>
+                        <p class="text-gray-400 leading-relaxed text-sm">
+                            为了保证每一位到场新生都能深度互动、结识核心学长姐与志同道合的好友，本次活动特设限定专属席位，额满即止。
+                        </p>
+                    </div>
+                    <div class="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-xs text-dragon-gold font-outfit">
+                        <span>LIMITED 30 SEATS</span>
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE EVENT TIMELINE SECTION -->
+    <section id="timeline" class="py-24 relative z-10 bg-dragon-bg">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center mb-20">
+                <h2 class="text-xs font-outfit uppercase tracking-widest text-dragon-gold mb-3">EVENT SCHEDULE & FLOW</h2>
+                <p class="text-3xl sm:text-5xl font-bold font-serif text-white mb-4">精彩活动流程</p>
+                <p class="text-gray-400 text-sm">滚动探索每一个精彩环节 / Scroll to explore agenda</p>
+            </div>
+
+            <!-- Timeline Container -->
+            <div class="relative">
+                <!-- Vertical Progress Rail -->
+                <div class="absolute left-4 sm:left-1/2 top-0 bottom-0 w-1 bg-white/10 transform sm:-translate-x-1/2 rounded-full"></div>
+                
+                <!-- Dynamic Scroll Fill Progress Line -->
+                <div id="timeline-progress" class="absolute left-4 sm:left-1/2 top-0 w-1 bg-gradient-to-b from-dragon-gold via-dragon-red to-dragon-gold transform sm:-translate-x-1/2 rounded-full h-0 shadow-[0_0_12px_#f59e0b]"></div>
+
+                <!-- Timeline Nodes -->
+                <div class="space-y-12 relative">
+                    
+                    <!-- 1. 07:30 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 sm:pl-0 sm:text-right mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">07:30 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 w-full">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="user-check" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>报道 / Registration</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">签到并领取活动专属个人名牌与精美迎新小礼包。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 07:45 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row-reverse items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 sm:pl-0 sm:text-left mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">07:45 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 w-full sm:text-right">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center sm:justify-end space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="sparkles" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>Opening / 开幕仪式</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">震撼开场词，拉开《毅见倾新》聚会帷幕。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 07:50 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 sm:pl-0 sm:text-right mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">07:50 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 w-full">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="building" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>毅华宿舍村介绍</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">探索 Kolej Pendeta Za'ba (KPZ) 毅华宿舍村的历史、环境与独特文化。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 08:00 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row-reverse items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 sm:pl-0 sm:text-left mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">08:00 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 w-full sm:text-right">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center sm:justify-end space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="award" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>理事会介绍 + 26/27 招募</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">25/26 毅华理事会成果展示，并启动 26/27 招募计划，欢迎新生加入领导行列。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. 08:10 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 sm:pl-0 sm:text-right mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">08:10 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 w-full">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="smile" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>Ice Breaking 破冰游戏</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">打破尴尬与拘束，在轻松愉快的互动中快速记住新朋友的名字。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. 08:25 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row-reverse items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 sm:pl-0 sm:text-left mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">08:25 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 w-full sm:text-right">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20 bg-gradient-to-r from-dragon-red/10 to-transparent">
+                                <div class="flex items-center sm:justify-end space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="gamepad-2" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>团队游戏环节</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">考验团队默契与反应力的精彩竞答与挑战游戏，赢取神秘好礼。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. 08:50 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 sm:pl-0 sm:text-right mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">08:50 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 w-full">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-red/40 bg-dragon-red/5">
+                                <div class="flex items-center space-x-3 text-dragon-red font-bold text-lg mb-1">
+                                    <i data-lucide="zap" class="w-5 h-5 text-dragon-red"></i>
+                                    <h3>趣小惩罚环节</h3>
+                                </div>
+                                <p class="text-xs text-gray-300">游戏失利队伍的小型趣味惩罚，现场笑点不断，气氛最高潮！</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. 09:00 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row-reverse items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 sm:pl-0 sm:text-left mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">09:00 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 w-full sm:text-right">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center sm:justify-end space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="message-square" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>Senior 经验分享</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">资深学长姐亲身分享大学选课、宿舍生活技巧与学业平衡干货。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. 09:10 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 sm:pl-0 sm:text-right mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">09:10 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 w-full">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="help-circle" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>Q&A 问答互动</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">现场自由提问环节，解答关于大学生活的所有疑虑与好奇。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. 09:20 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row-reverse items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 sm:pl-0 sm:text-left mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-red/20 text-dragon-gold font-outfit font-bold text-sm border border-dragon-gold/30">09:20 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-6 h-6 rounded-full bg-dragon-bg border-2 border-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_10px_#f59e0b] z-20">
+                            <span class="w-2 h-2 rounded-full bg-dragon-gold"></span>
+                        </div>
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 w-full sm:text-right">
+                            <div class="spotlight-card p-6 rounded-2xl border border-dragon-gold/20">
+                                <div class="flex items-center sm:justify-end space-x-3 text-white font-bold text-lg mb-1">
+                                    <i data-lucide="clipboard-check" class="w-5 h-5 text-dragon-gold"></i>
+                                    <h3>Closing + 反馈填写</h3>
+                                </div>
+                                <p class="text-xs text-gray-400">闭幕致辞并扫描 QR Code 填写本次活动反馈问卷。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 11. 09:30 PM -->
+                    <div class="timeline-item relative flex flex-col sm:flex-row items-start sm:items-center">
+                        <div class="sm:w-1/2 sm:pr-12 pl-12 sm:pl-0 sm:text-right mb-2 sm:mb-0">
+                            <span class="inline-block px-3 py-1 rounded bg-dragon-gold text-black font-outfit font-bold text-sm border border-dragon-gold">09:30 P.M.</span>
+                        </div>
+                        <div class="timeline-dot absolute left-4 sm:left-1/2 w-8 h-8 rounded-full bg-dragon-gold transform -translate-x-1/2 flex items-center justify-center shadow-[0_0_20px_#f59e0b] z-20">
+                            <i data-lucide="camera" class="w-4 h-4 text-black"></i>
+                        </div>
+                        <div class="sm:w-1/2 sm:pl-12 pl-12 w-full">
+                            <div class="spotlight-card p-6 rounded-2xl border-2 border-dragon-gold bg-gradient-to-r from-dragon-gold/20 to-transparent">
+                                <div class="flex items-center space-x-3 text-dragon-gold font-bold text-xl mb-1">
+                                    <i data-lucide="camera" class="w-6 h-6 text-dragon-gold"></i>
+                                    <h3>温馨大合照 & 结束</h3>
+                                </div>
+                                <p class="text-xs text-gray-200">全体大合影留念，记录我们「毅见倾新」的第一张全家福！</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- POSTER & LIGHTBOX SECTION -->
+    <section id="poster" class="py-24 relative z-10 border-t border-dragon-red/20">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+                
+                <!-- Text Info -->
+                <div class="w-full lg:w-1/2 space-y-6">
+                    <span class="text-xs font-outfit uppercase tracking-widest text-dragon-gold block">OFFICIAL EVENT POSTER</span>
+                    <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white leading-tight">
+                        视觉海报 preview
+                    </h2>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        经典传承与现代审美的碰撞，完美融入中国龙图腾元素。点击海报可放大全屏预览，亦可使用海报下方 QR Code 直接加入交流圈。
+                    </p>
+
+                    <div class="space-y-3 pt-4 font-outfit text-sm">
+                        <div class="flex items-center space-x-3 text-gray-300">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-dragon-gold"></i>
+                            <span>高清官方报到 QR Code 扫描</span>
+                        </div>
+                        <div class="flex items-center space-x-3 text-gray-300">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-dragon-gold"></i>
+                            <span>包含三大主打环节：宿舍介绍、破冰游戏、新生问答</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button onclick="openLightbox('1.jpg')" class="inline-flex items-center space-x-3 px-6 py-3 rounded-full border border-dragon-gold/50 bg-dragon-card text-dragon-gold hover:bg-dragon-gold hover:text-black transition-all">
+                            <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                            <span class="font-outfit font-semibold text-sm">全屏查看完整海报 Lightbox</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Poster Preview Box -->
+                <div class="w-full lg:w-1/2 flex justify-center">
+                    <div class="spotlight-card p-3 rounded-3xl border border-dragon-gold/30 group cursor-pointer max-w-md w-full shadow-[0_0_30px_rgba(220,38,38,0.2)]" onclick="openLightbox('1.jpg')">
+                        <div class="relative rounded-2xl overflow-hidden aspect-[3/4] bg-dragon-dark">
+                            <img src="1.jpg" alt="毅见倾新 Poster" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/800x1100/180f18/f59e0b?text=The+Beginning+of+Us+Poster'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dragon-bg via-transparent to-transparent opacity-60"></div>
+                            <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-dragon-gold bg-black/60 backdrop-blur-md p-3 rounded-xl border border-dragon-gold/20">
+                                <span class="font-outfit">点击全屏放大</span>
+                                <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="py-24 relative z-10 bg-dragon-dark/60 border-t border-dragon-red/20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            
+            <h2 class="text-xs font-outfit uppercase tracking-widest text-dragon-gold mb-3">GET IN TOUCH</h2>
+            <p class="text-3xl sm:text-4xl font-bold font-serif text-white mb-12">有任何疑问？联系活动负责人</p>
+
+            <div class="spotlight-card p-8 sm:p-12 rounded-3xl border border-dragon-gold/30 max-w-xl mx-auto text-left">
+                <div class="flex items-center space-x-6 mb-8">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-dragon-gold to-dragon-red p-0.5">
+                        <div class="w-full h-full rounded-full bg-dragon-card flex items-center justify-center text-dragon-gold font-bold font-serif text-2xl">
+                            F
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">FIONA</h3>
+                        <p class="text-xs text-dragon-gold font-outfit uppercase">毅见倾新 · 迎新负责人</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <a href="tel:01136638916" class="flex items-center space-x-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-gray-200">
+                        <i data-lucide="phone" class="w-5 h-5 text-dragon-gold"></i>
+                        <span class="font-outfit font-semibold">011-36638916</span>
+                    </a>
+                    
+                    <a href="https://wa.me/601136638916" target="_blank" class="flex items-center space-x-4 p-4 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 transition-colors text-green-400">
+                        <i data-lucide="message-circle" class="w-5 h-5 text-green-400"></i>
+                        <span class="font-outfit font-semibold">WhatsApp 直接沟通</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12 relative z-10 border-t border-white/10 text-center text-gray-500 text-xs font-outfit">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="text-dragon-gold font-cinzel text-lg mb-2">THE BEGINNING OF US</p>
+            <p>2026/2027 毅华新生迎新会 · Kolej Pendeta Za'ba (KPZ) UKM</p>
+            <p class="mt-4 text-gray-600">&copy; 2026 毅华理事会. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- RSVP MODAL -->
+    <div id="rsvp-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="rsvp-card" class="spotlight-card p-8 rounded-3xl border border-dragon-gold/40 max-w-lg w-full transform scale-95 transition-transform duration-300 relative">
+            
+            <button onclick="closeRSVPModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <div id="rsvp-form-container">
+                <div class="text-center mb-6">
+                    <span class="text-xs font-outfit uppercase tracking-widest text-dragon-gold">LIMITED 30 SEATS</span>
+                    <h3 class="text-2xl font-bold font-serif text-white mt-1">预约迎新会名额</h3>
+                    <p class="text-xs text-gray-400 mt-1">填写真实信息以锁定席位</p>
+                </div>
+
+                <form id="rsvp-form" onsubmit="handleRSVPSubmit(event)" class="space-y-4 font-outfit text-sm">
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">中文姓名 / Full Name *</label>
+                        <input type="text" id="rsvp-name" required placeholder="如：张伟 / Alex Tan" class="w-full px-4 py-3 rounded-xl bg-black/60 border border-dragon-gold/30 text-white focus:outline-none focus:border-dragon-gold transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">电话号码 / Contact No. (WhatsApp) *</label>
+                        <input type="tel" id="rsvp-phone" required placeholder="如：012-3456789" class="w-full px-4 py-3 rounded-xl bg-black/60 border border-dragon-gold/30 text-white focus:outline-none focus:border-dragon-gold transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">学院 / 宿舍 (Faculty / Dorm)</label>
+                        <input type="text" id="rsvp-faculty" placeholder="如：FST / KPZ Block A" class="w-full px-4 py-3 rounded-xl bg-black/60 border border-dragon-gold/30 text-white focus:outline-none focus:border-dragon-gold transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">饮食需求 / Dietary Need</label>
+                        <select id="rsvp-diet" class="w-full px-4 py-3 rounded-xl bg-black/60 border border-dragon-gold/30 text-white focus:outline-none focus:border-dragon-gold transition-colors">
+                            <option value="none">普通 / Standard</option>
+                            <option value="vegetarian">清真 / 素食 (Vegetarian/Halal)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 mt-2 rounded-xl bg-gradient-to-r from-dragon-gold via-dragon-goldLight to-dragon-accent text-black font-bold tracking-wider hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all">
+                        确认提交预约 CONFIRM RSVP
+                    </button>
+                </form>
+            </div>
+
+            <!-- Success Message State -->
+            <div id="rsvp-success" class="hidden text-center py-8">
+                <div class="w-16 h-16 rounded-full bg-dragon-gold/20 border border-dragon-gold flex items-center justify-center text-dragon-gold mx-auto mb-4">
+                    <i data-lucide="check-circle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">预约成功！RSVP Confirmed</h3>
+                <p class="text-sm text-gray-300 mb-6">期待 1/10/2026 7:30 P.M. 与你在 Grand Hall KPZ 相聚！</p>
+                <button onclick="closeRSVPModal()" class="px-6 py-2.5 rounded-full bg-dragon-gold text-black font-bold text-sm">
+                    完成 Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-lg opacity-0 pointer-events-none transition-opacity duration-300 p-4" onclick="closeLightbox()">
+        <button class="absolute top-6 right-6 text-white hover:text-dragon-gold p-2">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <img id="lightbox-img" src="" alt="Poster Full View" class="max-h-[90vh] max-w-[90vw] rounded-2xl border border-dragon-gold/40 shadow-2xl object-contain">
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initCountdown();
+            initEmberCanvas();
+            initCustomCursor();
+            initWaverunSpotlights();
+            initGSAPAnimations();
+            initAudio();
+        });
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+        document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
+
+        function initCountdown() {
+            const targetDate = new Date('2026-10-01T19:30:00+08:00').getTime();
+
+            function updateTimer() {
+                const now = new Date().getTime();
+                const diff = targetDate - now;
+
+                if (diff <= 0) {
+                    document.getElementById('cd-days').innerText = '00';
+                    document.getElementById('cd-hours').innerText = '00';
+                    document.getElementById('cd-mins').innerText = '00';
+                    document.getElementById('cd-secs').innerText = '00';
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
+                document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
+                document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
+                document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
+            }
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+
+        function initEmberCanvas() {
+            const canvas = document.getElementById('ember-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particleCount = 65;
+            const particles = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 2.5 + 0.5,
+                    color: Math.random() > 0.4 ? '#f59e0b' : '#dc2626',
+                    vx: (Math.random() - 0.5) * 0.6,
+                    vy: -(Math.random() * 0.8 + 0.2),
+                    alpha: Math.random() * 0.7 + 0.3
+                });
+            }
+
+            function render() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach(p => {
+                    // Slight gentle mouse influence
+                    const dx = mouseX - p.x;
+                    const dy = mouseY - p.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        p.x += (dx / dist) * 0.2;
+                    }
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.y < -10) {
+                        p.y = height + 10;
+                        p.x = Math.random() * width;
+                    }
+                    if (p.x < -10) p.x = width + 10;
+                    if (p.x > width + 10) p.x = -10;
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                requestAnimationFrame(render);
+            }
+
+            render();
+        }
+
+        function initCustomCursor() {
+            const dot = document.getElementById('cursor-dot');
+            const aura = document.getElementById('cursor-aura');
+
+            let auraX = 0, auraY = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                dot.style.left = `${mouseX}px`;
+                dot.style.top = `${mouseY}px`;
+            });
+
+            function animateCursor() {
+                auraX += (mouseX - auraX) * 0.15;
+                auraY += (mouseY - auraY) * 0.15;
+
+                aura.style.left = `${auraX}px`;
+                aura.style.top = `${auraY}px`;
+
+                requestAnimationFrame(animateCursor);
+            }
+
+            animateCursor();
+        }
+
+        function initWaverunSpotlights() {
+            const cards = document.querySelectorAll('.spotlight-card');
+
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
+        }
+
+        function initGSAPAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero Entrance
+            gsap.from('.hero-anim', {
+                opacity: 0,
+                y: 40,
+                duration: 1.2,
+                stagger: 0.15,
+                ease: 'power3.out'
+            });
+
+            // Timeline Vertical Fill ScrollTrigger
+            gsap.to('#timeline-progress', {
+                height: '100%',
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '#timeline',
+                    start: 'top 60%',
+                    end: 'bottom 80%',
+                    scrub: true
+                }
+            });
+
+            // Timeline Items reveal
+            gsap.utils.toArray('.timeline-item').forEach((item) => {
+                gsap.from(item, {
+                    opacity: 0,
+                    y: 30,
+                    duration: 0.8,
+                    ease: 'power2.out',
+                    scrollTrigger: {
+                        trigger: item,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+        }
+
+        function openLightbox(imgSrc) {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            img.src = imgSrc;
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function openRSVPModal() {
+            const modal = document.getElementById('rsvp-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('rsvp-card').classList.remove('scale-95');
+            document.getElementById('rsvp-card').classList.add('scale-100');
+        }
+
+        function closeRSVPModal() {
+            const modal = document.getElementById('rsvp-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('rsvp-card').classList.remove('scale-100');
+            document.getElementById('rsvp-card').classList.add('scale-95');
+        }
+
+        function handleRSVPSubmit(e) {
+            e.preventDefault();
+            
+            // Confetti burst on successful registration
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#f59e0b', '#dc2626', '#fef08a']
+            });
+
+            document.getElementById('rsvp-form-container').classList.add('hidden');
+            document.getElementById('rsvp-success').classList.remove('hidden');
+        }
+
+        let isAudioPlaying = false;
+        let synth, synthLoop;
+
+        function initAudio() {
+            const soundBtn = document.getElementById('sound-toggle');
+            const soundIcon = document.getElementById('sound-icon');
+
+            soundBtn.addEventListener('click', async () => {
+                if (!isAudioPlaying) {
+                    await Tone.start();
+                    
+                    if (!synth) {
+                        synth = new Tone.PolySynth(Tone.Synth, {
+                            oscillator: { type: 'sine' },
+                            envelope: { attack: 1.5, decay: 2, sustain: 0.6, release: 3 }
+                        }).toDestination();
+                        synth.volume.value = -16;
+                    }
+
+                    // Oriental pentatonic drone loop
+                    synthLoop = new Tone.Loop(time => {
+                        synth.triggerAttackRelease(["D3", "A3", "D4", "F#4"], "2m", time);
+                    }, "2m").start(0);
+
+                    Tone.Transport.start();
+
+                    isAudioPlaying = true;
+                    soundIcon.setAttribute('data-lucide', 'volume-2');
+                    lucide.createIcons();
+                } else {
+                    Tone.Transport.stop();
+                    isAudioPlaying = false;
+                    soundIcon.setAttribute('data-lucide', 'volume-x');
+                    lucide.createIcons();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
